@@ -1144,7 +1144,7 @@
 		$(document).on("mouseup", function (ev) {
 			selectedDay = null;
 			if(opts.cancelfun) {
-				cancelfun();
+				opts.cancelfun();
 			}
 			ev.stopPropagation();
 			if (jet.boxelem == "#jedatebox") {
