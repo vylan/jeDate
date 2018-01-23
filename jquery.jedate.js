@@ -23,12 +23,13 @@
 	}
 	var jet = {},
 		doc = document,
-		regymdzz = "YYYY|MM|DD|hh|mm|ss|zz",
+		regymdzz = "YYYY|MM|DD|HH|mm|ss|zz",
 		gr = /\-/g,
-		regymd = "YYYY|MM|DD|hh|mm|ss|zz".replace("|zz", ""),
+		regymd = "YYYY|MM|DD|HH|mm|ss|zz".replace("|zz", ""),
 		parseInt = function (n) {
 			return window.parseInt(n, 10);
 		},
+		selectedDay = null, // 记录点击的日期
 		config = {
 			skinCell: "jedateblue",
 			language: {
@@ -44,7 +45,7 @@
 			},
 			range: false,
 			trigger: "click",
-			format: "YYYY-MM-DD hh:mm:ss", //日期格式
+			format: "YYYY-MM-DD HH:mm:ss", //日期格式
 			minDate: "1900-01-01 00:00:00", //最小日期
 			maxDate: "2099-12-31 23:59:59" //最大日期
 		};
@@ -162,8 +163,8 @@
 	};
 	jet.mlen = function (format) {
 		var matlen = format.match(/\w+|d+/g).length,
-			mathh = (format.substring(0, 2) == "hh"),
-			lens = mathh && matlen <= 3 ? 7 : matlen;
+			matHH = (format.substring(0, 2) == "HH"),
+			lens = matHH && matlen <= 3 ? 7 : matlen;
 		return lens;
 	};
 	//验证日期
@@ -218,12 +219,12 @@
 	}
 	//获取返回的日期
 	jet.GetDateTime = function (obj, format) {
-		format = format || 'YYYY-MM-DD hh:mm:ss';
+		format = format || 'YYYY-MM-DD HH:mm:ss';
 		var objVal = $.extend({
 				YYYY: null,
 				MM: null,
 				DD: null,
-				hh: 0,
+				HH: 0,
 				mm: 0,
 				ss: 0
 			}, obj),
@@ -231,13 +232,13 @@
 				YYYY: "FullYear",
 				MM: "Month",
 				DD: "Date",
-				hh: "Hours",
+				HH: "Hours",
 				mm: "Minutes",
 				ss: "Seconds"
 			};
 
 		var result = new DateTime().reDate();
-		$.each(["ss", "mm", "hh", "DD", "MM", "YYYY"], function (i, mat) {
+		$.each(["ss", "mm", "HH", "DD", "MM", "YYYY"], function (i, mat) {
 			if (!jet.isNum(parseInt(objVal[mat]))) return null;
 			var reVal = result.GetValue();
 			if (parseInt(objVal[mat]) || parseInt(objVal[mat]) == 0) {
@@ -249,7 +250,7 @@
 			YYYY: result.GetFullYear(),
 			MM: result.GetMonth(),
 			DD: result.GetDate(),
-			hh: result.GetHours(),
+			HH: result.GetHours(),
 			mm: result.GetMinutes(),
 			ss: result.GetSeconds()
 		}, format);
@@ -333,7 +334,7 @@
 					YYYY: addval[0],
 					MM: jet.digit(addval[1]),
 					DD: jet.digit(addval[2]),
-					hh: jet.digit(addval[3]),
+					HH: jet.digit(addval[3]),
 					mm: jet.digit(addval[4]),
 					ss: jet.digit(addval[5])
 				}];
@@ -443,7 +444,7 @@
 						YYYY: dateY,
 						MM: dateM,
 						DD: dateD,
-						hh: timeh,
+						HH: timeh,
 						mm: timem,
 						ss: times,
 						zz: 00
@@ -452,7 +453,7 @@
 						YYYY: dateY,
 						MM: dateM,
 						DD: dateD,
-						hh: timeh,
+						HH: timeh,
 						mm: timem,
 						ss: times,
 						zz: 00
@@ -507,7 +508,7 @@
 			valx = allvals[1];
 		that.format = isShow ? that.format : boxCell.attr("jeformat");
 		var mlens = jet.mlen(that.format),
-			testhh = /\hh/.test(that.format);
+			testHH = /\HH/.test(that.format);
 		var clearTxt = lang.name == "cn" ? (!isShow ? "重置" : lang.clear) : (!isShow ? "Reset" : lang.clear);
 		var headcon = "<div class='arthead'></div><div class='artcont'></div>",
 			artcont = $("<div/>", {
@@ -554,17 +555,17 @@
 			return boxCell.find(elem + " > " + (is == 0 ? ".arthead" : ".artcont"));
 		};
 		//设置时分秒
-		if (testhh) {
+		if (testHH) {
 			var minVal = /\s/.test(jet.minDate) ? minTime[1] : minTime[0],
 				maxVal = /\s/.test(jet.maxDate) ? maxTime[1] : maxTime[0];
 			var rehms = jet.reMatch(minVal),
-				vehms = [vals.hh, vals.mm, vals.ss],
+				vehms = [vals.HH, vals.mm, vals.ss],
 				hms = [];
 			if (isrange) {
 				if (that.getValue() == "") {
 					hms = mlens == 7 ? rehms.concat(rehms) : rehms.concat([00, 00, 00]);
 				} else {
-					hms = vehms.concat([valx.hh, valx.mm, valx.ss]);
+					hms = vehms.concat([valx.HH, valx.mm, valx.ss]);
 				}
 			} else {
 				hms = vehms;
@@ -584,8 +585,8 @@
 			that.maincon(".daybox", 0).append('<em class="yearprev yprev fa fa-angle-double-left"></em><em class="fa fa-angle-left monthprev mprev"></em><em class="fa fa-angle-right monthnext mnext"></em><em class="fa fa-angle-double-right yearnext ynext"></em>');
 			boxCell.find(".daybox").show();
 			that.eachDays(vals.YYYY, vals.MM, vals.DD, opts, boxCell);
-			//判断日期格式中是否包含hh（时）
-			if (testhh) {
+			//判断日期格式中是否包含HH（时）
+			if (testHH) {
 				that.maincon(".timebox", 1).attr("cont", "no");
 				that.maincon(".timebox", 0).html(lang.titText + '<em class="close iconfont icon-gs-close"></em>');
 				boxCell.find(".timecon").on("click", function () {
@@ -651,7 +652,7 @@
 			multiPane = jet.isBool(opts.multiPane),
 			mlens = jet.mlen(that.format),
 			ymarr = that.getValue({}),
-			testhh = /\hh/.test(that.format),
+			testHH = /\HH/.test(that.format),
 			formatYY = mlens == 1;
 
 		if (ymscon.find(".ymcon").length > 0) ymscon.find(".ymcon").remove();
@@ -664,7 +665,7 @@
 					return (parseInt(sval) == parseInt(gval)) ? (s == 0 ? "actdate" : "") : "";
 				} else {
 					if (parseInt(sval) == parseInt(gval)) {
-						if (!testhh) {
+						if (!testHH) {
 							that.areaVal.push(sym);
 							that.areaStart = true;
 						}
@@ -672,7 +673,7 @@
 					} else if (parseInt(sval) > parseInt(gval) && parseInt(sval) < parseInt(eval)) {
 						return "contain";
 					} else if (parseInt(sval) == parseInt(eval)) {
-						if (!testhh) {
+						if (!testHH) {
 							that.areaVal.push(sym);
 							that.areaStart = true;
 						}
@@ -994,9 +995,9 @@
 			gval = that.getValue({}),
 			isVal = that.getValue() == "",
 			ranges = opts.range == false,
-			minTime = jet.minDate.replace(/\s+/g, " ").split(" "),
-			maxTime = jet.maxDate.replace(/\s+/g, " ").split(" "),
-			isymdh = /YYYY-MM-DD/g.test(jet.isparmat(that.format)) && /\hh/.test(that.format);
+			minTime = (opts.minDate || jet.minDate).replace(/\s+/g, " ").split(" "),
+			maxTime = (opts.maxDate || jet.maxDate).replace(/\s+/g, " ").split(" "),
+			isymdh = /YYYY-MM-DD/g.test(jet.isparmat(that.format)) && /\HH/.test(that.format);
 		var minhms = jet.reMatch(minTime[1]),
 			maxhms = jet.reMatch(maxTime[1]);
 		var hmsCell = that.maincon(".timebox", 1),
@@ -1007,8 +1008,30 @@
 			timeh = date.getHours(),
 			timem = date.getMinutes(),
 			times = date.getSeconds();
-		var minVal = [gval[0].hh || timeh, gval[0].mm || timem, gval[0].ss || times],
-			maxVal = [gval[1].hh || timeh, gval[1].mm || timem, gval[1].ss || times];
+		var minVal = [gval[0].HH || timeh, gval[0].mm || timem, gval[0].ss || times],
+			maxVal = [gval[1].HH || timeh, gval[1].mm || timem, gval[1].ss || times];
+		if (selectedDay && (opts.minDate || opts.maxDate)) {
+			// 比较天数
+			var selectedDate = new Date(selectedDay).setHours(0, 0, 0, 0);
+			if (opts.minDate) {
+				var minDate = new Date(opts.minDate).setHours(0, 0, 0, 0);
+				if (selectedDate > minDate) {
+					minhms = ['00', '00'];
+				}
+				if (selectedDate < minDate) {
+					minhms = ['24', '60']
+				}
+			}
+			if (opts.maxDate) {
+				var maxDate = new Date(opts.maxDate).setHours(0, 0, 0, 0);
+				if (selectedDate > maxDate) {
+					maxhms = ['24', '60'];
+				}
+				if (selectedDate < maxDate) {
+					maxhms = ['00', '00']
+				}
+			}
+		}
 		if (opts.range == false && boxCell.find(".timelist").length > 0) return;
 		$.each(new Array(ranges ? 1 : 2), function (m) {
 			var timeList = $("<div/>", {
@@ -1119,6 +1142,10 @@
 		}
 		//点击空白处隐藏
 		$(document).on("mouseup", function (ev) {
+			selectedDay = null;
+			if(opts.cancelfun) {
+				cancelfun();
+			}
 			ev.stopPropagation();
 			if (jet.boxelem == "#jedatebox") {
 				var box = $(jet.boxelem);
@@ -1218,7 +1245,7 @@
 								YYYY: ymYear,
 								MM: ymMonth,
 								DD: ymDate.getDate(),
-								hh: ymDate.getHours(),
+								HH: ymDate.getHours(),
 								mm: ymDate.getMinutes(),
 								ss: ymDate.getSeconds()
 							};
@@ -1247,7 +1274,7 @@
 								YYYY: pnYear,
 								MM: month,
 								DD: ymDate.getDate(),
-								hh: ymDate.getHours(),
+								HH: ymDate.getHours(),
 								mm: ymDate.getMinutes(),
 								ss: ymDate.getSeconds()
 							};
@@ -1282,7 +1309,7 @@
 								YYYY: yearVal,
 								MM: monthVal,
 								DD: ymDate.getDate(),
-								hh: ymDate.getHours(),
+								HH: ymDate.getHours(),
 								mm: ymDate.getMinutes(),
 								ss: ymDate.getSeconds()
 							};
@@ -1373,6 +1400,8 @@
 					if (jet.isBool(opts.onClose)) {
 						tdCls.removeClass(carr[0]);
 						lithis.addClass(carr[0]);
+						var objs = /\HH/.test(that.format) ? $.extend(ymdObj, that.gethmsVal(boxCell)) : ymdObj;
+						selectedDay = thisdate;
 					} else {
 						var ymdObj = {},
 							spval = jet.reMatch(lithis.attr(valStr));
@@ -1380,7 +1409,7 @@
 						$.each(spval, function (i, val) {
 							ymdObj[matArr[i]] = val;
 						});
-						var objs = /\hh/.test(that.format) ? $.extend(ymdObj, that.gethmsVal(boxCell)) : ymdObj;
+						var objs = /\HH/.test(that.format) ? $.extend(ymdObj, that.gethmsVal(boxCell)) : ymdObj;
 						var vals = that.setValue(objs);
 						that.dateClose();
 						if ($.isFunction(opts.okfun) || opts.okfun != null) {
@@ -1464,7 +1493,7 @@
 		var that = this,
 			elemCell = that.valCell,
 			isShow = jet.isBool(opts.isShow),
-			ishhmat = jet.mlen(that.format) == 7,
+			isHHmat = jet.mlen(that.format) == 7,
 			multiPane = jet.isBool(opts.multiPane),
 			isYYMM = jet.mlen(that.format) == 2,
 			isYY = jet.mlen(that.format) == 1;
@@ -1500,7 +1529,7 @@
 					YYYY: xDate.getFullYear(),
 					MM: jet.digit(xDate.getMonth() + 1),
 					DD: jet.digit(xDate.getDate()),
-					hh: jet.digit(xDate.getHours()),
+					HH: jet.digit(xDate.getHours()),
 					mm: jet.digit(xDate.getMinutes()),
 					ss: jet.digit(xDate.getSeconds())
 				};
@@ -1514,6 +1543,7 @@
 		});
 		//确认按钮设置日期时间
 		boxCell.on("click", ".setok", function (ev) {
+			selectedDay = null;
 			ev.stopPropagation();
 			var sDate = new Date(),
 				okVal, valdate, objVal;
@@ -1526,10 +1556,10 @@
 						$.each(spval, function (i, val) {
 							ymdObj[matArr[i]] = val;
 						});
-						var objVal = /\hh/.test(that.format) ? $.extend(ymdObj, hmsVal) : ymdObj;
+						var objVal = /\HH/.test(that.format) ? $.extend(ymdObj, hmsVal) : ymdObj;
 						return objVal;
 					};
-				okVal = ishhmat ? hmsVal : dateVal();
+				okVal = isHHmat ? hmsVal : dateVal();
 			} else {
 				var newobj = {},
 					newarea = [],
@@ -1553,7 +1583,7 @@
 					}
 				} else {
 					$.each(that.areaVal, function (n, val) {
-						var group = val + (/\hh/.test(that.format) ? " " + hmsArr[n].join(":") : "");
+						var group = val + (/\HH/.test(that.format) ? " " + hmsArr[n].join(":") : "");
 						var repgroup = group.replace(/\s|-|:/g, "");
 						newobj[repgroup] = group;
 						newarea.push(repgroup);
@@ -1574,7 +1604,7 @@
 					YYYY: okVal.YYYY || sDate.getFullYear(),
 					MM: jet.digit(okVal.MM || sDate.getMonth() + 1),
 					DD: jet.digit(okVal.DD || sDate.getDate()),
-					hh: jet.digit(okVal.hh || sDate.getHours()),
+					HH: jet.digit(okVal.HH || sDate.getHours()),
 					mm: jet.digit(okVal.mm || sDate.getMinutes()),
 					ss: jet.digit(okVal.ss || sDate.getSeconds())
 				};
@@ -1599,7 +1629,7 @@
 	};
 	jedfn.clickTime = function (opts, boxCell) {
 		var that = this;
-		if (/\hh/.test(that.format)) {
+		if (/\HH/.test(that.format)) {
 			var timeUl = that.maincon(".timebox", 1).find("ul");
 			timeUl.on("click", "li", function () {
 				var lithis = $(this);
@@ -1927,7 +1957,7 @@
 	$.dateVer = "6.0.2";
 	//返回指定日期
 	$.nowDate = function (str, format) {
-		format = format || 'YYYY-MM-DD hh:mm:ss';
+		format = format || 'YYYY-MM-DD HH:mm:ss';
 		if (typeof (str) === 'number') {
 			str = {
 				DD: str
@@ -1937,7 +1967,7 @@
 	};
 	//日期时间戳相互转换
 	$.timeStampDate = function (date, format) {
-		format = format || 'YYYY-MM-DD hh:mm:ss';
+		format = format || 'YYYY-MM-DD HH:mm:ss';
 		var dateTest = (/^(-)?\d{1,10}$/.test(date) || /^(-)?\d{1,13}$/.test(date));
 		if (/^[1-9]*[1-9][0-9]*$/.test(date) && dateTest) {
 			var vdate = parseInt(date);
@@ -1956,7 +1986,7 @@
 				YYYY: setdate.getFullYear(),
 				MM: jet.digit(setdate.getMonth() + 1),
 				DD: jet.digit(setdate.getDate()),
-				hh: jet.digit(setdate.getHours()),
+				HH: jet.digit(setdate.getHours()),
 				mm: jet.digit(setdate.getMinutes()),
 				ss: jet.digit(setdate.getSeconds())
 			}, format);
@@ -1975,7 +2005,7 @@
 			YYYY: parseInt(sdate[0]),
 			MM: parseInt(sdate[1]) || 00,
 			DD: parseInt(sdate[2]) || 00,
-			hh: parseInt(sdate[3]) || 00,
+			HH: parseInt(sdate[3]) || 00,
 			mm: parseInt(sdate[4]) || 00,
 			ss: parseInt(sdate[5]) || 00
 		};
@@ -1983,7 +2013,7 @@
 	//获取年月日星期
 	$.getLunar = function (date, format) {
 		var that = this;
-		format = format || 'YYYY-MM-DD hh:mm:ss';
+		format = format || 'YYYY-MM-DD HH:mm:ss';
 		if (/YYYY-MM-DD/g.test(jet.isparmat(format))) {
 			//如果为数字类型的日期对获取到日期的进行替换
 			var charDate = date.substr(0, 4).replace(/^(\d{4})/g, "$1,") + date.substr(4).replace(/(.{2})/g, "$1,"),
