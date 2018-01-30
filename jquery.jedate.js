@@ -49,11 +49,13 @@
 			minDate: "1900-01-01 00:00:00", //最小日期
 			maxDate: "2099-12-31 23:59:59" //最大日期
 		};
+	
 	$.fn.jeDate = function (options) {
 		return new jeDate($(this), options || {});
 	};
 	$.extend({
 		jeDate: function (elem, options) {
+			selectedDay = new Date(options.value).setHours(0, 0, 0, 0);
 			return new jeDate($(elem), options || {});
 		}
 	});
@@ -1400,7 +1402,30 @@
 					if (jet.isBool(opts.onClose)) {
 						tdCls.removeClass(carr[0]);
 						lithis.addClass(carr[0]);
+						var ymdObj = {},
+							spval = jet.reMatch(lithis.attr(valStr));
+						//获取时分秒的集合
+						$.each(spval, function (i, val) {
+							ymdObj[matArr[i]] = val;
+						});
 						var objs = /\HH/.test(that.format) ? $.extend(ymdObj, that.gethmsVal(boxCell)) : ymdObj;
+						var vals = that.setValue(objs);
+						var val = new Date(vals);
+						var min = null, max = null;
+						if(that.opts.minDate) {
+							min = new Date(that.opts.minDate);
+						}
+						if(that.opts.maxDate) {
+							max = new Date(that.opts.maxDate);
+						}
+
+						if((min && min > val) || (max && max < val)) {
+							// 非法
+							$('#jedatebox .setok').addClass('disabled');
+						}else {
+							$('#jedatebox .setok').removeClass('disabled');
+						}
+
 						selectedDay = thisdate;
 					} else {
 						var ymdObj = {},
@@ -1543,6 +1568,8 @@
 		});
 		//确认按钮设置日期时间
 		boxCell.on("click", ".setok", function (ev) {
+			// 检查是否禁止
+			if($(this).hasClass('disabled')) return;
 			selectedDay = null;
 			ev.stopPropagation();
 			var sDate = new Date(),
@@ -1636,10 +1663,21 @@
 				var ulidx = lithis.parent().attr("idx"),
 					hmsval = lithis.text();
 				if (lithis.hasClass("disabled")) return;
+				// 将确定按钮的状态改为可用
+				// $('#jedatebox .setok').removeClass('disabled');
 				lithis.addClass('action').siblings().removeClass('action');
 				boxCell.find(".timecon em").eq(ulidx).text(hmsval);
 				//计算当前时分秒的位置
 				that.locateScroll(timeUl);
+				var current = that.gethmsVal(boxCell);
+				if(that.opts.minDate) {
+					var min = new Date(that.opts.minDate);
+					if (min.getHours() < current.HH) {
+						$('#jedatebox .setok').removeClass('disabled');
+					} else if(min.getHours() == current.HH && min.getMinutes() < current.mm) {
+						$('#jedatebox .setok').removeClass('disabled');
+					}
+				}
 			});
 		}
 	};
