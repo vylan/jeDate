@@ -1229,6 +1229,7 @@
 			//年或年月情况下的变化
 			$.each([yPre, yNext], function (ym, cls) {
 				cls.on("click", function (ev) {
+					ev.stopPropagation();
 					var cthat = $(this),
 						ymMonth = ymDate.getMonth() + 1,
 						ymMin = parseInt(cthat.parent().attr("min")),
@@ -1329,11 +1330,12 @@
 				boxCell.children(".ymsbox").show();
 				boxCell.children(".daybox,.mainfoot").hide();
 				if (isShow) that.dateOrien(boxCell, that.valCell);
+				ev.stopPropagation() 
 			});
 			var aloneSelym = function () {
 				var ulCell = boxCell.find(".ymcon"),
 					tdCell = ulCell.find("td");
-				tdCell.on("click", function () {
+				tdCell.on("click", function (ev) {
 					var sefl = $(this),
 						seval = jet.reMatch(sefl.attr("je-val"));
 					tdCell.removeClass(carr[0]);
@@ -1341,6 +1343,7 @@
 					boxCell.children(".jedate-contfix").show();
 					boxCell.children(".jedate-jedatewrap").hide();
 					that.renderHtml(seval[0], seval[1], null, opts, boxCell);
+					ev.stopPropagation();
 				})
 			};
 			$.each([yPre, yNext], function (ym, cls) {
@@ -1353,12 +1356,14 @@
 					aloneSelym();
 					if (isShow) that.dateOrien(boxCell, that.valCell);
 					if ($.isFunction(opts.toggle)) opts.toggle();
+					ev.stopPropagation();
 				})
 			});
 			ymhead.on("click", ".close", function (ev) {
 				boxCell.children(".daybox,.mainfoot").show();
 				boxCell.children(".ymsbox").hide();
 				if (isShow) that.dateOrien(boxCell, that.valCell);
+				ev.stopPropagation();
 			});
 			aloneSelym();
 		}
@@ -1569,6 +1574,7 @@
 		//确认按钮设置日期时间
 		boxCell.on("click", ".setok", function (ev) {
 			// 检查是否禁止
+			ev.stopPropagation();
 			if($(this).hasClass('disabled')) return;
 			selectedDay = null;
 			ev.stopPropagation();
@@ -2070,3 +2076,4 @@
 	};
 	return jeDate;
 });
+
